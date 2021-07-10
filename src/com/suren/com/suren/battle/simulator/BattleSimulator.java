@@ -5,9 +5,8 @@ import com.suren.battle.model.outcome.BattleOutcome;
 import com.suren.battle.model.outcome.BattleResult;
 import com.suren.battle.model.outcome.ResultType;
 import com.suren.battle.model.terrain.Terrain;
-import com.suren.battle.model.troop.SoldierType;
+import com.suren.battle.model.platoon.Platoon;
 import com.suren.com.suren.battle.simulator.util.Parser;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,41 +15,48 @@ import java.util.List;
  * Class to simulate battles for the given troops & terrains
  */
 public class BattleSimulator {
-    private List<SoldierType> ourTroops;
-    private List<SoldierType> enemyTroops;
-    private List<Terrain> terrains;
+    private final List<Platoon> ourTroops;
+    private final List<Platoon> enemyTroops;
+    private final List<Terrain> terrains;
     private BattleOutcome battleOutcome;
     private boolean isWinningCombinationFound = false;
-    // TODO remove while committing
-    private int executionCount = 0;
     private boolean canUserArtillery;
 
     /**
      * Constructor for Battle simulator
-     * @param ourTroops
-     * @param enemyTroops
-     * @param terrains
+     * @param ourTroops List containing our troops
+     * @param enemyTroops List containing enemy's troops
+     * @param terrains Terrains of battle
      */
-    public BattleSimulator(List<SoldierType> ourTroops, List<SoldierType> enemyTroops, List<Terrain> terrains) {
+    public BattleSimulator(List<Platoon> ourTroops, List<Platoon> enemyTroops, List<Terrain> terrains) {
         this.ourTroops = ourTroops;
         this.enemyTroops = enemyTroops;
         this.terrains = terrains;
     }
 
+    /**
+     * Method to simulate all battles
+     */
     public void simulateBattles() {
-//        System.out.println("Beginning Simulation");
         startSimulationWithDifferentCombinations(this.ourTroops);
+        displayBattleResults();
+    }
+
+    /**
+     * Method to display results of the battle
+     */
+    private void displayBattleResults() {
         if (!isWinningCombinationFound) {
             System.out.println("There is no chance of winning");
         } else {
             System.out.println("\n\nWinning Combination");
             System.out.println("-------------------\n");
             for (BattleResult battleResult: battleOutcome.getResults()) {
-                SoldierType enemyTroop = battleResult.getEnemyTroop();
-                SoldierType ourTroop = battleResult.getOurTroop();
+                Platoon enemyTroop = battleResult.getEnemyTroop();
+                Platoon ourTroop = battleResult.getOurTroop();
                 System.out.println(
-                        enemyTroop.getSoldierName() + "-" + enemyTroop.getSoldiersCount() + " X " +
-                        ourTroop.getSoldierName() + "-" + ourTroop.getSoldiersCount() + " => "
+                        enemyTroop.getPlatoonName() + "-" + enemyTroop.getPlatoonCount() + " X " +
+                        ourTroop.getPlatoonName() + "-" + ourTroop.getPlatoonCount() + " => "
                                 + battleResult.getResult()
                 );
             }
@@ -62,20 +68,21 @@ public class BattleSimulator {
         }
     }
 
-    private @NotNull
-    BattleOutcome simulateBatch(List<SoldierType> ourTroops) {
-        executionCount++;
+    /**
+     * Method to simulate a particular batch of results
+     * @param ourTroops List of our soilders in the branch
+     * @return the battle outcome
+     */
+    private BattleOutcome simulateBatch(List<Platoon> ourTroops) {
         int wins = 0;
         int losses = 0;
         int draws = 0;
         List<BattleResult> results = new ArrayList<>();
         canUserArtillery = Configurations.isArtilleryAvailable();
         for (int i = 0; i < Configurations.getBattleCount(); i++) {
-            SoldierType ourTroop = ourTroops.get(i);
-            SoldierType enemyTroop = this.enemyTroops.get(i);
+            Platoon ourTroop = ourTroops.get(i);
+            Platoon enemyTroop = this.enemyTroops.get(i);
             Terrain battleTerrain = this.terrains.get(i);
-
-//            System.out.println(ourTroop.getSoldierName() + "-" + ourTroop.getSoldiersCount() + " X " + enemyTroop.getSoldierName() + "-" + enemyTroop.getSoldiersCount() + " in " + battleTerrain );
 
             BattleResult result = simulateBattle(ourTroop, enemyTroop, battleTerrain);
             switch (result.getResult()) {
@@ -89,22 +96,22 @@ public class BattleSimulator {
                     draws++;
                     break;
             }
-//            System.out.println(result.getResult());
+
             results.add(result);
         }
-
         return new BattleOutcome(results, wins, losses, draws);
     }
 
     /**
-     * @param ourTroop
-     * @param enemyTroop
-     * @param battleTerrain
-     * @return
+     * Method to simulate battle and calculate the result
+     * @param ourTroop list of our troops
+     * @param enemyTroop list of enemy's troops
+     * @param battleTerrain list of terrains
+     * @return the result of the battle
      */
-    private BattleResult simulateBattle(SoldierType ourTroop, SoldierType enemyTroop, Terrain battleTerrain) {
-        List<Class<? extends  SoldierType>> ourAdvantages = ourTroop.getAdvantageOverSoldiers();
-        List<Class<? extends  SoldierType>> enemyAdvantages = enemyTroop.getAdvantageOverSoldiers();
+    private BattleResult simulateBattle(Platoon ourTroop, Platoon enemyTroop, Terrain battleTerrain) {
+        List<Class<? extends Platoon>> ourAdvantages = ourTroop.getAdvantageOverPlatoons();
+        List<Class<? extends Platoon>> enemyAdvantages = enemyTroop.getAdvantageOverPlatoons();
 
         List<Terrain> ourAdvantageTerrain = ourTroop.getAdvantageTerrain();
         List<Terrain> ourDisadvantageTerrain = ourTroop.getDisadvantageTerrain();
@@ -113,13 +120,8 @@ public class BattleSimulator {
         List<Terrain> enemyDisadvantageTerrain = enemyTroop.getDisadvantageTerrain();
 
 
-        int ourEffectiveTroopCount = ourTroop.getSoldiersCount();
-        int enemyEffectiveTroopCount = enemyTroop.getSoldiersCount();
-
-//        System.out.println(ourTroop.getClass());
-//        System.out.println(ourAdvantages.contains(enemyTroop.getClass()));
-//        System.out.println(enemyTroop.getClass());
-//        System.out.println(enemyAdvantages.contains(ourTroop.getClass()));
+        int ourEffectiveTroopCount = ourTroop.getPlatoonCount();
+        int enemyEffectiveTroopCount = enemyTroop.getPlatoonCount();
 
         if (ourAdvantages.contains(enemyTroop.getClass())) {
             ourEffectiveTroopCount *= 2;
@@ -145,7 +147,6 @@ public class BattleSimulator {
             enemyEffectiveTroopCount *= 0.5;
         }
 
-//        System.out.println(ourEffectiveTroopCount  - enemyEffectiveTroopCount);
         ResultType result = ResultType.DRAW;
         boolean isWonByArtillery = false;
         if (ourEffectiveTroopCount > enemyEffectiveTroopCount) {
@@ -161,11 +162,21 @@ public class BattleSimulator {
         return new BattleResult(ourTroop, enemyTroop, battleTerrain, result, isWonByArtillery);
     }
 
-    public void startSimulationWithDifferentCombinations(List<SoldierType> troops){
+    /**
+     * Method that give multiple combinations of our troops
+     * @param troops list of our troops
+     */
+    public void startSimulationWithDifferentCombinations(List<Platoon> troops){
         getCombinationAndSimulate(troops, 0);
     }
 
-    private BattleOutcome getCombinationAndSimulate(List<SoldierType> troops, int pos){
+    /**
+     * Recursive method to get different combinations till we find a winning combination
+     * @param troops list of troops
+     * @param pos position in the battle
+     * @return outcome of the battle
+     */
+    private BattleOutcome getCombinationAndSimulate(List<Platoon> troops, int pos){
         if (this.isWinningCombinationFound) {
             return null;
         }
@@ -174,20 +185,13 @@ public class BattleSimulator {
         }
 
         for(int i = pos; i < troops.size(); i++){
-
-            SoldierType t = troops.get(pos);
+            Platoon t = troops.get(pos);
             troops.set(pos, troops.get(i));
             troops.set(i, t);
 
             BattleOutcome outcome = getCombinationAndSimulate(troops, pos+1);
 
-//            System.out.println("++++++++++++++++++++++" + (outcome != null ? outcome.overAllResult() : "") + "+++++++++++++++" + executionCount);
-
-//            System.out.println(outcome);
-//            if (outcome.ge)
-            if (outcome != null && outcome.overAllResult().equals(ResultType.WIN)) {
-//                System.out.println("++++++++++++++++++++++" + executionCount);
-//                System.out.println(troops);
+            if (outcome != null && outcome.getOverAllResult().equals(ResultType.WIN)) {
                 this.isWinningCombinationFound = true;
                 this.battleOutcome = outcome;
                 break;

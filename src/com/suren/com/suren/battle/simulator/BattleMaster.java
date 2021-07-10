@@ -2,14 +2,20 @@ package com.suren.com.suren.battle.simulator;
 
 import com.suren.battle.model.Configurations;
 import com.suren.battle.model.terrain.Terrain;
-import com.suren.battle.model.troop.SoldierType;
+import com.suren.battle.model.platoon.Platoon;
 import com.suren.com.suren.battle.simulator.util.BattleUtil;
 import com.suren.com.suren.battle.simulator.util.Parser;
 
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Class to get input from the console and initiate the battle simulation sequence
+ */
 public class BattleMaster {
+    /**
+     * Method to initiate input gathering sequence from the CLI
+     */
     public void initiate() {
         Scanner inScanner = new Scanner(System.in);
 
@@ -29,7 +35,7 @@ public class BattleMaster {
         System.out.println("\n____________________________");
         System.out.println("Please enter your platoon:");
         String ourPlatoonString;
-        List<SoldierType> ourPlatoon = null;
+        List<Platoon> ourPlatoon = null;
         while (ourPlatoon == null) {
             ourPlatoonString = inScanner.next();
             ourPlatoon = Parser.parsePlatoon(ourPlatoonString);
@@ -43,7 +49,7 @@ public class BattleMaster {
         System.out.println("\n____________________________");
         System.out.println("Please enter enemy platoon:");
         String enemyPlatoonString;
-        List<SoldierType> enemyPlatoon = null;
+        List<Platoon> enemyPlatoon = null;
         while (enemyPlatoon == null) {
             enemyPlatoonString = inScanner.next();
             enemyPlatoon = Parser.parsePlatoon(enemyPlatoonString);
@@ -88,8 +94,10 @@ public class BattleMaster {
 
         boolean isValidBattle = BattleUtil.validateBattleInputs(ourPlatoon, enemyPlatoon, terrains);
 
+        // check for input's validity
         if (isValidBattle) {
             BattleSimulator simulator = new BattleSimulator(ourPlatoon, enemyPlatoon, terrains);
+            // Initiates simulation process
             simulator.simulateBattles();
         } else {
             System.err.println("Our platoon or enemy platoon or terrain is doesn't have the same number of entries as" +

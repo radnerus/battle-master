@@ -1,12 +1,21 @@
-package com.suren.battle.model.troop;
+package com.suren.battle.model.platoon;
 
-public class SoldierFactory {
-    public SoldierType createSoldier(String soldierName, int count) {
-        if (soldierName == null || soldierName.isEmpty()) {
+/**
+ * Factory method to construct different types of Platoons
+ */
+public class PlatoonFactory {
+    /**
+     * Method to construct different types of Platoons
+     * @param platoonName name of the platoon
+     * @param count count of soldiers in the platoon
+     * @return platoon object
+     */
+    public Platoon createPlatoon(String platoonName, int count) {
+        if (platoonName == null || platoonName.isEmpty()) {
             return null;
         }
 
-        switch (soldierName) {
+        switch (platoonName) {
             case "Militia":
                 return new Militia(count);
             case "Spearmen":
@@ -20,6 +29,7 @@ public class SoldierFactory {
             case "FootArcher":
                 return new FootArcher(count);
         }
+
         return null;
     }
 }

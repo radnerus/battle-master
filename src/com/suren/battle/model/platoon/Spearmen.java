@@ -1,55 +1,62 @@
-package com.suren.battle.model.troop;
+package com.suren.battle.model.platoon;
 
 import com.suren.battle.model.terrain.Terrain;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Militia extends SoldierType {
-    private final String name = "Militia";
+/**
+ * Model for Spearmen Platoon
+ */
+public class Spearmen extends Platoon {
+    private final String name = "Spearmen";
     private final int count;
 
-    public Militia(int count) {
+    /**
+     * Constructor for Spearmen with count
+     * @param count # of spearmen
+     */
+    public Spearmen(int count) {
         this.count = count;
     }
 
     /**
-     * Name of the Troops
+     * Name of the Platoons
      *
      * @return name
      */
     @Override
-    public String getSoldierName() {
+    public String getPlatoonName() {
         return name;
     }
 
     /**
-     * Troop count
+     * Platoon count
      *
      * @return count
      */
     @Override
-    public int getSoldiersCount() {
+    public int getPlatoonCount() {
         return count;
     }
 
     /**
-     * Troops again whom the current troop has advantage over
+     * Platoons again whom the current Platoon has advantage over
      *
-     * @return advantage over troops
+     * @return advantage over Platoons
      */
     @Override
-    public List<Class<? extends SoldierType>> getAdvantageOverSoldiers() {
+    public List<Class<? extends Platoon>> getAdvantageOverPlatoons() {
         return new ArrayList<>() {
             {
-                add(Spearmen.class);
                 add(LightCavalry.class);
+                add(HeavyCavalry.class);
             }
         };
     }
 
     /**
-     * Advantage terrain for the current troop
+     * Advantage terrain for the current Platoon
      *
      * @return advantage terrain
      */
@@ -59,7 +66,7 @@ public class Militia extends SoldierType {
     }
 
     /**
-     * Disadvantage terrain for the current troop
+     * Disadvantage terrain for the current Platoon
      *
      * @return disadvantage terrain
      */
@@ -70,7 +77,7 @@ public class Militia extends SoldierType {
 
     @Override
     public String toString() {
-        return "Militia{" +
+        return "Spearmen{" +
                 "name='" + name + '\'' +
                 ", count=" + count +
                 '}';
